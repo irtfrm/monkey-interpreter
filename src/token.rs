@@ -63,4 +63,10 @@ impl Token {
             literal
         }
     }
+    pub fn from_str(token_type: TokenType, literal: &str) -> Token {
+        Token {
+            token_type,
+            literal: literal.to_string()
+        }
+    }
 }

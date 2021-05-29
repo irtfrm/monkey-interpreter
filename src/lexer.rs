@@ -43,7 +43,8 @@ impl Lexer {
                     b')' => Token::new(TokenType::RPAREN, literal),
                     b'{' => Token::new(TokenType::LBRACE, literal),
                     b'}' => Token::new(TokenType::RBRACE, literal),
-                    _ => Token::new(TokenType::EOF, "".to_string()),
+                    0 => Token::from_str(TokenType::EOF, ""),
+                    _ => Token::new(TokenType::ILLEGAL, literal),
                 }
             }
         };
@@ -62,15 +63,15 @@ mod test {
     fn test_next_token() {
         let input = String::from("=+(){},;");
         let tests: [Token; 9] = [
-            Token::new(TokenType::ASSIGN, "=".to_string()),
-            Token::new(TokenType::PLUS, "+".to_string()),
-            Token::new(TokenType::LPAREN, "(".to_string()),
-            Token::new(TokenType::RPAREN, ")".to_string()),
-            Token::new(TokenType::LBRACE, "{".to_string()),
-            Token::new(TokenType::RBRACE, "}".to_string()),
-            Token::new(TokenType::COMMA, ",".to_string()),
-            Token::new(TokenType::SEMICOLON, ";".to_string()),
-            Token::new(TokenType::EOF, "".to_string()),
+            Token::from_str(TokenType::ASSIGN, "="),
+            Token::from_str(TokenType::PLUS, "+"),
+            Token::from_str(TokenType::LPAREN, "("),
+            Token::from_str(TokenType::RPAREN, ")"),
+            Token::from_str(TokenType::LBRACE, "{"),
+            Token::from_str(TokenType::RBRACE, "}"),
+            Token::from_str(TokenType::COMMA, ","),
+            Token::from_str(TokenType::SEMICOLON, ";"),
+            Token::from_str(TokenType::EOF, ""),
         ];
 
         let mut l = Lexer::new(input);
@@ -79,6 +80,101 @@ mod test {
             let tok: Token = l.next_token();
             assert_eq!(tok, *expected);
         }
-        // unimplemented!();
+    }
+
+    #[test]
+    fn test_add_function_token() {
+        let input = String::from(r#"let five = 5;
+let ten = 10;
+
+let add = fn(x, y) {
+    x = y;
+};
+
+let result = add(five, ten);
+"#);
+        let tests: [Token; 37] = [
+            Token::from_str(TokenType::LET, "let"),
+            Token::from_str(TokenType::IDENT, "five"),
+            Token::from_str(TokenType::ASSIGN, "="),
+            Token::from_str(TokenType::INT, "5"),
+            Token::from_str(TokenType::SEMICOLON, ";"),
+            Token::from_str(TokenType::LET, "let"),
+            Token::from_str(TokenType::IDENT, "ten"),
+            Token::from_str(TokenType::ASSIGN, "="),
+            Token::from_str(TokenType::INT, "10"),
+            Token::from_str(TokenType::SEMICOLON, ";"),
+            Token::from_str(TokenType::LET, "let"),
+            Token::from_str(TokenType::IDENT, "add"),
+            Token::from_str(TokenType::ASSIGN, "="),
+            Token::from_str(TokenType::FUNCTION, "fn"),
+            Token::from_str(TokenType::LPAREN, "("),
+            Token::from_str(TokenType::IDENT, "x"),
+            Token::from_str(TokenType::COMMA, ","),
+            Token::from_str(TokenType::IDENT, "y"),
+            Token::from_str(TokenType::RPAREN, ")"),
+            Token::from_str(TokenType::LBRACE, "{"),
+            Token::from_str(TokenType::IDENT, "x"),
+            Token::from_str(TokenType::PLUS, "+"),
+            Token::from_str(TokenType::IDENT, "y"),
+            Token::from_str(TokenType::SEMICOLON, ";"),
+            Token::from_str(TokenType::RBRACE, "}"),
+            Token::from_str(TokenType::SEMICOLON, ";"),
+            Token::from_str(TokenType::LET, "let"),
+            Token::from_str(TokenType::IDENT, "result"),
+            Token::from_str(TokenType::ASSIGN, "="),
+            Token::from_str(TokenType::IDENT, "add"),
+            Token::from_str(TokenType::LPAREN, "("),
+            Token::from_str(TokenType::IDENT, "five"),
+            Token::from_str(TokenType::COMMA, ","),
+            Token::from_str(TokenType::IDENT, "ten"),
+            Token::from_str(TokenType::RPAREN, ")"),
+            Token::from_str(TokenType::SEMICOLON, ";"),
+            // Token::from_str(TokenType::BANG, "!"),
+            // Token::from_str(TokenType::MINUS, "-"),
+            // Token::from_str(TokenType::SLASH, "/"),
+            // Token::from_str(TokenType::ASTERISK, "*"),
+            // Token::from_str(TokenType::INT, "5"),
+            // Token::from_str(TokenType::SEMICOLON, ";"),
+            // Token::from_str(TokenType::INT, "5"),
+            // Token::from_str(TokenType::LT, "<"),
+            // Token::from_str(TokenType::INT, "10"),
+            // Token::from_str(TokenType::GT, ">"),
+            // Token::from_str(TokenType::INT, "5"),
+            // Token::from_str(TokenType::SEMICOLON, ";"),
+            // Token::from_str(TokenType::IF, "if"),
+            // Token::from_str(TokenType::LPAREN, "("),
+            // Token::from_str(TokenType::INT, "5"),
+            // Token::from_str(TokenType::LT, "<"),
+            // Token::from_str(TokenType::INT, "10"),
+            // Token::from_str(TokenType::RPAREN, ")"),
+            // Token::from_str(TokenType::LBRACE, "{"),
+            // Token::from_str(TokenType::RETURN, "return"),
+            // Token::from_str(TokenType::TRUE, "true"),
+            // Token::from_str(TokenType::SEMICOLON, ";"),
+            // Token::from_str(TokenType::RBRACE, "}"),
+            // Token::from_str(TokenType::ELSE, "else"),
+            // Token::from_str(TokenType::LBRACE, "{"),
+            // Token::from_str(TokenType::RETURN, "return"),
+            // Token::from_str(TokenType::FALSE, "false"),
+            // Token::from_str(TokenType::SEMICOLON, ";"),
+            // Token::from_str(TokenType::RBRACE, "}"),
+            // Token::from_str(TokenType::INT, "10"),
+            // Token::from_str(TokenType::EQ, "=="),
+            // Token::from_str(TokenType::INT, "10"),
+            // Token::from_str(TokenType::SEMICOLON, ";"),
+            // Token::from_str(TokenType::INT, "10"),
+            // Token::from_str(TokenType::NOT_EQ, "!="),
+            // Token::from_str(TokenType::INT, "9"),
+            // Token::from_str(TokenType::SEMICOLON, ";"),
+            Token::from_str(TokenType::EOF, ""),
+        ];
+
+        let mut l = Lexer::new(input);
+
+        for expected in &tests {
+            let tok: Token = l.next_token();
+            assert_eq!(tok, *expected);
+        }
     }
 }
