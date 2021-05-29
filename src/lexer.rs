@@ -1,6 +1,10 @@
 use crate::token::Token;
 use crate::token::TokenType;
 
+pub fn is_letter(ch: u8) -> bool {
+    return b'A' <= ch && ch <= b'Z' || b'a' <= ch && ch <= b'z' || ch == b'_';
+}
+
 pub struct Lexer {
     input: String,
     position: usize,
@@ -17,7 +21,7 @@ impl Lexer {
             ch: 0
         };
         lexer.read_char();
-        lexer
+        return lexer;
     }
 
     pub fn read_char(&mut self) {
@@ -29,6 +33,15 @@ impl Lexer {
         self.position = self.read_position;
         self.read_position += 1;
     }
+
+    pub fn read_identifier(&mut self) -> &str {
+        let position = self.position;
+        while is_letter(self.ch) {
+            self.read_char();
+        }
+        return &(self.input)[position..self.position]
+    }
+
 
     pub fn next_token(&mut self) -> Token {
         let tok = match String::from_utf8(vec![self.ch]){
@@ -44,6 +57,7 @@ impl Lexer {
                     b'{' => Token::new(TokenType::LBRACE, literal),
                     b'}' => Token::new(TokenType::RBRACE, literal),
                     0 => Token::from_str(TokenType::EOF, ""),
+                    b'A'..=b'Z'|b'a'..=b'z'|b'_' => Token::from_str(TokenType::IDENT, self.read_identifier()),
                     _ => Token::new(TokenType::ILLEGAL, literal),
                 }
             }
