@@ -13,6 +13,15 @@ pub enum TokenType {
     // operators
     ASSIGN,
     PLUS,
+    MINUS,
+    BANG,
+    ASTERISK,
+    SLASH,
+
+    EQ,
+    NOT_EQ,
+    LT,
+    GT,
 
     // delimiters
     COMMA,
@@ -25,7 +34,12 @@ pub enum TokenType {
 
     // keywords
     FUNCTION,
+    RETURN,
     LET,
+    IF,
+    ELSE,
+    TRUE,
+    FALSE,
 }
 
 impl fmt::Display for TokenType {
@@ -45,6 +59,19 @@ impl fmt::Display for TokenType {
             TokenType::RBRACE => "}",
             TokenType::FUNCTION => "FUNCTION",
             TokenType::LET => "LET",
+            TokenType::MINUS => "-",
+            TokenType::BANG => "!",
+            TokenType::ASTERISK => "*",
+            TokenType::SLASH => "/",
+            TokenType::EQ => "==",
+            TokenType::NOT_EQ => "!=",
+            TokenType::LT => "<",
+            TokenType::GT => ">",
+            TokenType::RETURN => "RETURN",
+            TokenType::IF => "IF",
+            TokenType::ELSE => "ELSE",
+            TokenType::TRUE => "TRUE",
+            TokenType::FALSE => "FALSE",
         };
         write!(f, "{}", token_name)
     }
@@ -60,6 +87,11 @@ impl KeywordMatch {
         
         map.insert("fn".to_string(), TokenType::FUNCTION);
         map.insert("let".to_string(), TokenType::LET);
+        map.insert("return".to_string(), TokenType::RETURN);
+        map.insert("if".to_string(), TokenType::IF);
+        map.insert("else".to_string(), TokenType::ELSE);
+        map.insert("true".to_string(), TokenType::TRUE);
+        map.insert("false".to_string(), TokenType::FALSE);
         return KeywordMatch{map: map};
     }
 
