@@ -39,6 +39,14 @@ impl Lexer {
         self.read_position += 1;
     }
 
+    pub fn peek_char(&mut self) -> u8 {
+        if self.read_position >= self.input.len() {
+            0
+        } else {
+            self.input.bytes().nth(self.read_position).unwrap()
+        }
+    }
+
     pub fn read_identifier(&mut self) -> &str {
         let position = self.position;
         while is_letter(self.ch) {
@@ -67,7 +75,14 @@ impl Lexer {
             Err(why) => panic!("{:?}", why),
             Ok(literal) => {
                 match self.ch {
-                    b'=' => Token::new(TokenType::ASSIGN, literal),
+                    b'=' => {
+                        if self.peek_char() == b'=' {
+                            self.read_char();
+                            Token::from_str(TokenType::EQ, &(self.input)[self.position-1..=self.position])
+                        } else {
+                            Token::new(TokenType::ASSIGN, literal)
+                        }
+                    }
                     b'+' => Token::new(TokenType::PLUS, literal),
                     b',' => Token::new(TokenType::COMMA, literal),
                     b';' => Token::new(TokenType::SEMICOLON, literal),
@@ -76,7 +91,14 @@ impl Lexer {
                     b'{' => Token::new(TokenType::LBRACE, literal),
                     b'}' => Token::new(TokenType::RBRACE, literal),
                     b'-' => Token::new(TokenType::MINUS, literal),
-                    b'!' => Token::new(TokenType::BANG, literal),
+                    b'!' => {
+                        if self.peek_char() == b'=' {
+                            self.read_char();
+                            Token::from_str(TokenType::NOT_EQ, &(self.input)[self.position-1..=self.position])
+                        } else {
+                            Token::new(TokenType::BANG, literal)
+                        }
+                    }
                     b'*' => Token::new(TokenType::ASTERISK, literal),
                     b'/' => Token::new(TokenType::SLASH, literal),
                     b'<' => Token::new(TokenType::LT, literal),
@@ -109,29 +131,6 @@ mod test {
 
     #[test]
     fn test_next_token() {
-        let input = String::from("=+(){},;");
-        let tests: [Token; 9] = [
-            Token::from_str(TokenType::ASSIGN, "="),
-            Token::from_str(TokenType::PLUS, "+"),
-            Token::from_str(TokenType::LPAREN, "("),
-            Token::from_str(TokenType::RPAREN, ")"),
-            Token::from_str(TokenType::LBRACE, "{"),
-            Token::from_str(TokenType::RBRACE, "}"),
-            Token::from_str(TokenType::COMMA, ","),
-            Token::from_str(TokenType::SEMICOLON, ";"),
-            Token::from_str(TokenType::EOF, ""),
-        ];
-
-        let mut l = Lexer::new(input);
-
-        for expected in &tests {
-            let tok: Token = l.next_token();
-            assert_eq!(tok, *expected);
-        }
-    }
-
-    #[test]
-    fn test_add_function_token() {
         let input = String::from(r#"let five = 5;
 let ten = 10;
 
