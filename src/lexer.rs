@@ -1,8 +1,13 @@
+use crate::token;
 use crate::token::Token;
 use crate::token::TokenType;
 
 pub fn is_letter(ch: u8) -> bool {
     return b'A' <= ch && ch <= b'Z' || b'a' <= ch && ch <= b'z' || ch == b'_';
+}
+
+pub fn is_digit(ch: u8) -> bool {
+    return b'0' <= ch && ch <= b'9';
 }
 
 pub struct Lexer {
@@ -18,7 +23,7 @@ impl Lexer {
             input,
             position: 0,
             read_position: 0,
-            ch: 0
+            ch: 0,
         };
         lexer.read_char();
         return lexer;
@@ -42,8 +47,22 @@ impl Lexer {
         return &(self.input)[position..self.position]
     }
 
+    pub fn read_number(&mut self) -> &str {
+        let position = self.position;
+        while is_digit(self.ch) {
+            self.read_char();
+        }
+        return &(self.input)[position..self.position]
+    }
+
+    pub fn skip_whitespace(&mut self) {
+        while self.ch.is_ascii_whitespace() {
+            self.read_char()
+        }
+    }
 
     pub fn next_token(&mut self) -> Token {
+        self.skip_whitespace();
         let tok = match String::from_utf8(vec![self.ch]){
             Err(why) => panic!("{:?}", why),
             Ok(literal) => {
@@ -57,8 +76,17 @@ impl Lexer {
                     b'{' => Token::new(TokenType::LBRACE, literal),
                     b'}' => Token::new(TokenType::RBRACE, literal),
                     0 => Token::from_str(TokenType::EOF, ""),
-                    b'A'..=b'Z'|b'a'..=b'z'|b'_' => Token::from_str(TokenType::IDENT, self.read_identifier()),
-                    _ => Token::new(TokenType::ILLEGAL, literal),
+                    _ => {
+                        if is_letter(self.ch) {
+                            let keyword_mutch = token::KeywordMatch::new(); //TODO メンバ変数にしようとしたが所有権が邪魔でできない
+                            let ident = self.read_identifier();
+                            return Token::from_str(keyword_mutch.lookup_ident(ident), ident);
+                        } else if is_digit(self.ch) {
+                            return Token::from_str(TokenType::INT, self.read_number());
+                        } else {
+                            Token::new(TokenType::ILLEGAL, literal)
+                        }
+                    },
                 }
             }
         };
@@ -102,7 +130,7 @@ mod test {
 let ten = 10;
 
 let add = fn(x, y) {
-    x = y;
+    x + y;
 };
 
 let result = add(five, ten);

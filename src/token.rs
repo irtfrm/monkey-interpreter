@@ -1,7 +1,7 @@
-
+use std::collections::HashMap;
 use std::fmt;
 
-#[derive(Debug,PartialEq,Eq)]
+#[derive(Debug,PartialEq,Eq,Clone,Copy)]
 pub enum TokenType {
     ILLEGAL,
     EOF,
@@ -47,6 +47,27 @@ impl fmt::Display for TokenType {
             TokenType::LET => "LET",
         };
         write!(f, "{}", token_name)
+    }
+}
+
+pub struct KeywordMatch {
+    map: HashMap<String, TokenType>,
+}
+
+impl KeywordMatch {
+    pub fn new() -> KeywordMatch {
+        let mut map = HashMap::new();
+        
+        map.insert("fn".to_string(), TokenType::FUNCTION);
+        map.insert("let".to_string(), TokenType::LET);
+        return KeywordMatch{map: map};
+    }
+
+    pub fn lookup_ident(& self, ident: &str) -> TokenType {
+        match self.map.get(ident) {
+            Some(tok) => *tok,
+            None => TokenType::IDENT,
+        }
     }
 }
 
