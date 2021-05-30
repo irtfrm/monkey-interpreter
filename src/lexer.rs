@@ -18,9 +18,9 @@ pub struct Lexer {
 }
 
 impl Lexer {
-    pub fn new(input: String) -> Lexer {
+    pub fn new(input: &str) -> Lexer {
         let mut lexer = Lexer {
-            input,
+            input: input.to_string(),
             position: 0,
             read_position: 0,
             ch: 0,
@@ -131,7 +131,7 @@ mod test {
 
     #[test]
     fn test_next_token() {
-        let input = String::from(r#"let five = 5;
+        let input = r#"let five = 5;
 let ten = 10;
 
 let add = fn(x, y) {
@@ -150,7 +150,7 @@ if (5 < 10) {
 
 10 == 10;
 10 != 9;
-"#);
+"#;
         let tests: [Token; 74] = [
             Token::from_str(TokenType::LET, "let"),
             Token::from_str(TokenType::IDENT, "five"),
