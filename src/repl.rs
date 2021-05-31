@@ -4,7 +4,7 @@ use crate::token;
 
 const PROMPT: &[u8; 3] = b">> ";
 
-pub fn start(reader: &mut io::Stdin, writer: &mut io::Write) {
+pub fn start(reader: &mut io::Stdin, writer: &mut dyn io::Write) {
     let mut buf = String::new();
     writer.write_all(PROMPT).unwrap();
     writer.flush().unwrap();

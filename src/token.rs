@@ -122,6 +122,10 @@ impl Token {
             literal: literal.to_string()
         }
     }
+
+    pub fn get_literal(&self) -> &String {
+        return &self.literal;
+    }
 }
 
 impl fmt::Display for Token {

@@ -1,6 +1,7 @@
 mod token;
 mod lexer;
 mod repl;
+mod ast;
 use std::io;
 
 fn main() {
